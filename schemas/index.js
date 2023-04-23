@@ -1,5 +1,4 @@
-
-// (1) mongoose가져오기
+/* INDEX 세팅 */
 const mongoose = require("mongoose");
 
 // (2) mongoDB 연결

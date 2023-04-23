@@ -1,5 +1,4 @@
-
-// (1) mongoose가져오기
+/* 게시글 타입 세팅 */
 const mongoose = require("mongoose");
 
 // (2) 게시글에 올라갈 내용들의 타입 구성 세팅
