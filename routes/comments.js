@@ -11,8 +11,15 @@ router.post('/posts/:_postId/comments', authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { _postId } = req.params;
     const { comment } = req.body;
+    const cookie = req.cookies
     const existPost = await Posts.findOne({ userId, _id: _postId });
     try {
+        if(!cookie){
+            res.status(403).json({errorMessage :"전달된 쿠키에서 오류가 발생하였습니다."});
+        }
+        if(Date.now()>Date.now(cookie.expires)){
+            res.status(403).json({errorMessage :"전달된 쿠키에서 오류가 발생하였습니다."});
+        }
         if (!existPost) {
             res.status(403).json({ errorMessage: "게시글이 존재하지 않습니다." })
             return;

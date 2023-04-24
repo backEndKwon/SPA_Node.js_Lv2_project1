@@ -1,4 +1,3 @@
-/* 게시글 API 구현 */
 const express = require("express");
 const router = express.Router();
 
@@ -6,14 +5,26 @@ const authMiddleware = require("../middlewares/auth-middleware.js");
 const Posts = require("../schemas/posts.js");
 const Users = require("../schemas/user.js");
 
-/*         week1 (1)   게시글 작성 api             */
-/*         week2 (1)   게시글 작성 api             */
-//조건 : 유효토큰만 게시물 작성. 제목/작성내용 입력//
+/* 게시글 API 구현 */
+/* (1) 게시글 작성 api */
 router.post("/posts", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { title, content } = req.body;
+    const cookie = req.cookies;
 
     try {
+        if(!cookie){
+            res.status(403).json({
+                errorMessage:"전달된 쿠키에서 오류가 발생하였습니다."
+            });
+            return;
+        }
+        if(new Date()>new Date(cookie.expires)){
+            res.status(403).json({
+                errorMessage:"쿠키가 만료되었습니다."
+            });
+            return;
+        }
         if (!req.body) {
             res.status(412).json({
                 errorMessage: "데이터 형식이 올바르지 않습니다."
@@ -123,10 +134,17 @@ router.put("/posts/:_postId", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { _postId } = req.params //params이용해서 postid객체분할로 가져오기
     const { title, content } = req.body //content만 수정할거기때문에
+    const cookie = req.cookies
     // let setId = _postId;
     const existPost = await Posts.findOne({ userId, _id: _postId })
 
     try {
+        if(!cookie){
+            res.status(403).json({errorMessage :"전달된 쿠키에서 오류가 발생하였습니다."});
+        }
+        if(Date.now()>Date.now(cookie.expires)){
+            res.status(403).json({errorMessage :"전달된 쿠키에서 오류가 발생하였습니다."});
+        }
         if (!userId) { //에러메세지의 정확한 position을 못잡겠다..
             res.status(403).json({ errorMessage: "로그인이 필요한 페이지입니다." });//게시글 수정권한인가?
         } else {

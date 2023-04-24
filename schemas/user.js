@@ -1,9 +1,8 @@
-/* 2주차 과제 (2-1) Schemas상의 user 세팅 */
-
 const mongoose = require("mongoose");
+
 /* 회원가입 타입 세팅 */
-const UserSchema = new mongoose.Schema({
-  
+const UserSchema = new mongoose.Schema(
+    { 
     nickname: {
         type: String,
         required: true,
@@ -18,7 +17,6 @@ const UserSchema = new mongoose.Schema({
 UserSchema.virtual("userId").get(function () {
     return this._id.toHexString();
 });
-
 UserSchema.set("toJSON", {
     virtuals: true,
 });
