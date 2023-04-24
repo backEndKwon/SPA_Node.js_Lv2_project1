@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require("express");
 const router = express.Router();
 
@@ -18,9 +20,9 @@ router.post('/login', async (req, res) => {
             return;
         };
         //JWT 생성
-        const token = jwt.sign({ nickname: user.nickname }, "kwon-secret-key");
+        const token = jwt.sign({ nickname: user.nickname }, process.env.DB_KEY);
         
-        res.cookie("Authorization", `Bearer ${token}`,{ httpOnly: true, maxAge: 30000 });//JWT를 cookie로 할당
+        res.cookie("Authorization", `Bearer ${token}`,{ httpOnly: true, maxAge: 300000 });//JWT를 cookie로 할당30000=30초
         res.status(200).json({ token });//JWT(토큰)을 Body로 할당
 
     } catch (err) {

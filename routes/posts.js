@@ -36,7 +36,7 @@ router.post("/posts", authMiddleware, async (req, res) => {
             return;
         };
 
-        await Posts.create({ userId, title, content, createdAt });
+        await Posts.create({ userId, title, content });
         res.status(201).json({
             message: "게시글을 생성하였습니다."
         });
