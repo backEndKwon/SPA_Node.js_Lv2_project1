@@ -20,7 +20,7 @@ router.post('/login', async (req, res) => {
         //JWT 생성
         const token = jwt.sign({ nickname: user.nickname }, "kwon-secret-key");
         
-        res.cookie("Authorization", `Bearer ${token}`);//JWT를 cookie로 할당
+        res.cookie("Authorization", `Bearer ${token}`,{ httpOnly: true, maxAge: 30000 });//JWT를 cookie로 할당
         res.status(200).json({ token });//JWT(토큰)을 Body로 할당
 
     } catch (err) {

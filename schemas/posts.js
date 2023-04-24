@@ -6,11 +6,11 @@ const postsSchema = new mongoose.Schema(
         userId: {
             type: mongoose.Types.ObjectId,
             requried: true,
-            ref : "User"
+            ref: "User"
         },
-         nickname: {
+        nickname: {
             type: String,
-            ref : "User"
+            ref: "User"
         },
         title: {
             type: String
@@ -18,14 +18,11 @@ const postsSchema = new mongoose.Schema(
         content: {
             type: String
         },
-        createdAt: {
-            type: Date,
-            default: Date.now
-        },
-        updatedAt: {
-            type: Date,
-            default: Date.now
-        },
+        // createdAt: {type: Date,default: Date.now},
+        // updatedAt: {type: Date,default: Date.now}
+    },
+    {
+        timestamps: true
     },
     {
         versionKey: false,

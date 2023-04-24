@@ -1,30 +1,16 @@
+/* 게시글 API 구현 */
 const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/auth-middleware.js");
 const Posts = require("../schemas/posts.js");
-const Users = require("../schemas/user.js");
 
-/* 게시글 API 구현 */
 /* (1) 게시글 작성 api */
 router.post("/posts", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { title, content } = req.body;
-    const cookie = req.cookies;
 
     try {
-        if(!cookie){
-            res.status(403).json({
-                errorMessage:"전달된 쿠키에서 오류가 발생하였습니다."
-            });
-            return;
-        }
-        if(new Date()>new Date(cookie.expires)){
-            res.status(403).json({
-                errorMessage:"쿠키가 만료되었습니다."
-            });
-            return;
-        }
         if (!req.body) {
             res.status(412).json({
                 errorMessage: "데이터 형식이 올바르지 않습니다."
@@ -50,9 +36,10 @@ router.post("/posts", authMiddleware, async (req, res) => {
             return;
         };
 
-        const createdAt = new Date;
         await Posts.create({ userId, title, content, createdAt });
-        res.status(201).json({ message: "게시글을 생성하였습니다." });
+        res.status(201).json({
+            message: "게시글을 생성하였습니다."
+        });
 
     } catch (err) {
         return res.status(400).json({
@@ -60,45 +47,36 @@ router.post("/posts", authMiddleware, async (req, res) => {
         })
     }
 });
-////////////////////////////////////////////////////////////////////////
 
-
-/////////////////////   (2)   게시글 전체 조회 api       ////////////////////
-///구성 : get방식/ data[id,user,title, time]
+/* (2) 게시글 전체글 조회 API */
 router.get('/posts', authMiddleware, async (req, res) => {
     //Posts에 있는 모든데이터를 posts로 선언
     try {
-
-        const posts = await Posts.find({}).sort({ createdAt: -1 });
-
+        const { userId, nickname } = res.locals.user;
+        const posts = await Posts.find({ userId }).sort({ createdAt: -1 });
 
         const result = posts.map((data) => {
-
             return {
                 postId: data._id,
                 userId: data.userId,
-                nickname: Users.nickname,
+                nickname: nickname,
                 title: data.title,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt
             };
         });
 
-        //게시글 구성 = data [값, 값]
         res.status(200).json({ posts: result });
     } catch (err) {
         res.status(400).json({
             errorMessage: "게시글 조회에 실패하였습니다."
-        })
-    }
-
+        });
+    };
 });
-////////////////////////////////////////////////////////////////////////
 
-
-//////////////////   (3)   게시글 상세조회 api       ///////////////////
-///구성 : get방식/ postid 길이 24자 / content까지
+/* (3) 게시글 상세조회 api */
 router.get('/posts/:_postId', async (req, res) => {
+
     try {
         const { _postId } = req.params;
         const postdetail = await Posts.findOne({ _id: _postId }).select("-password -__v");
@@ -111,24 +89,21 @@ router.get('/posts/:_postId', async (req, res) => {
             "post": {
                 postId: postdetail.postId,
                 userId: postdetail.userId,
-                nickname: postdetail.nickname, ///닉네임이 호출이 안됨... 상세조회회
+                nickname: postdetail.nickname,
                 title: postdetail.title,
                 content: postdetail.content,
                 createdAt: postdetail.createdAt,
                 updatedAt: postdetail.updatedAt,
             }
-        })
+        });
     } catch (err) {
         res.status(400).json({ errorMessage: '게시글 조회에 실패하였습니다.' });
-    }
-
+    };
 });
-////////////////////////////////////////////////////////////////////////
 
 
-/////////////////////    (4)   게시글 수정 api       ///////////////////
-///구성 : put방식 , password, title, content
-///게시글을 수정한다 = content를 수정한다
+
+/* (3) 게시글 수정 api */
 router.put("/posts/:_postId", authMiddleware, async (req, res) => {
 
     const { userId } = res.locals.user;
@@ -139,28 +114,32 @@ router.put("/posts/:_postId", authMiddleware, async (req, res) => {
     const existPost = await Posts.findOne({ userId, _id: _postId })
 
     try {
-        if(!cookie){
-            res.status(403).json({errorMessage :"전달된 쿠키에서 오류가 발생하였습니다."});
-        }
-        if(Date.now()>Date.now(cookie.expires)){
-            res.status(403).json({errorMessage :"전달된 쿠키에서 오류가 발생하였습니다."});
-        }
-        if (!userId) { //에러메세지의 정확한 position을 못잡겠다..
-            res.status(403).json({ errorMessage: "로그인이 필요한 페이지입니다." });//게시글 수정권한인가?
+        if (!userId) { 
+            res.status(403).json({
+                errorMessage: "로그인이 필요한 페이지입니다."
+            });
         } else {
             if (existPost) {
                 await Posts.updateOne({ _id: _postId }, { $set: { title, content, updatedAt: Date.now() } });
-                res.status(200).json({ message: "게시글을 수정하였습니다." });
+                res.status(200).json({
+                    message: "게시글을 수정하였습니다."
+                });
             } else {
-                return res.status(400).json({ message: "게시글 삭제 권한이 없습니다." });
+                return res.status(400).json({
+                    message: "게시글 삭제 권한이 없습니다."
+                });
             }
         }
         if (content === 0) {
-            return res.status(412).json({ errorMessage: "게시글 내용의 형식이 올바르지 않습니다." })
+            return res.status(412).json({
+                errorMessage: "게시글 내용의 형식이 올바르지 않습니다."
+            })
         }
 
         if (title === 0) {
-            return res.status(412).json({ errorMessage: "게시글 제목의 형식이 올바르지 않습니다." })
+            return res.status(412).json({
+                errorMessage: "게시글 제목의 형식이 올바르지 않습니다."
+            })
         }
     } catch (err) {
         return res.status(400).json({
@@ -169,32 +148,39 @@ router.put("/posts/:_postId", authMiddleware, async (req, res) => {
     };
 
 });
-//////////////////////////////////////////////////////////////////////////
 
-
-/////////////////////    (5)   게시글 삭제 api       /////////////////////
-///구성 : delete방식 
+/* (3) 게시글 삭제 api */
 router.delete('/posts/:_postId', authMiddleware, async (req, res) => {
+   
     const { userId } = res.locals.user;
     const { _postId } = req.params;
     const postlist = await Posts.findOne({ userId, _id: _postId });
+   
     try {
         if (!userId) {
-            res.status(403).json({ errorMessage: "로그인이 필요한 기능입니다." });
-        }
+            res.status(403).json({
+                errorMessage: "로그인이 필요한 기능입니다."
+            });
+        };
         if (!postlist) {
-            res.status(404).json({ errorMessage: "게시글이 존재하지 않습니다." });
+            res.status(404).json({
+                errorMessage: "게시글이 존재하지 않습니다."
+            });
         }
         if (_postId !== postlist.postId) {
-            return res.status(403).json({ message: "게시글의 삭제권한이 존재하지 않습니다." })
+            return res.status(403).json({
+                message: "게시글의 삭제권한이 존재하지 않습니다."
+            })
         }
         await Posts.deleteOne({ userId, _id: _postId });
-        return res.status(200).json({ message: "게시글을 삭제하였습니다." })
+        return res.status(200).json({
+            message: "게시글을 삭제하였습니다."
+        })
     } catch (err) {
-        res.status(400).json({ errorMessage: " 게시글 작성에 실패하였습니다." });
+        res.status(400).json({
+            errorMessage: " 게시글 작성에 실패하였습니다."
+        });
     };
 });
-
-
 
 module.exports = router;

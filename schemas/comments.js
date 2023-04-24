@@ -3,25 +3,22 @@ const mongoose = require("mongoose");
 /* 댓글 타입 세팅 */
 const commentsSchema = new mongoose.Schema(
   {
-  userId: {
-    type: mongoose.Types.ObjectId,
-            requried: true,
-            ref : "Posts"
-  },
-  comment: {
-    type: String,
-    required: true
+    userId: {
+      type: mongoose.Types.ObjectId,
+      requried: true,
+      ref: "Posts"
+    },
+    comment: {
+      type: String,
+      required: true
 
+    },
+    // createdAt: {type: Date,default: Date.now},
+    // updatedAt: {type: Date,default: Date.now}
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  {
+    timestamps: true
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-},
   {
     versionKey: false //_v삭제
   });

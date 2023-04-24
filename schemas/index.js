@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 // (1) mongoDB 연결
 const connect = () => {
   mongoose
-    .connect("mongodb://127.0.0.1:27017/test_post")
+    .connect("mongodb://127.0.0.1:27017/test_mall")
     .catch(err => console.log(err));
 };
 

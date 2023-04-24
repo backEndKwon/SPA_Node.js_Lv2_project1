@@ -3,7 +3,6 @@ const router = express.Router();
 const Users = require("../schemas/user");
 
 /*   회원가입 API 구현   */
-
 router.post("/signup", async (req, res) => {
     const { nickname, password, confirm } = req.body;
 

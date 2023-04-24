@@ -1,9 +1,11 @@
 /* 2주차 과제 (1) authmiddleware 세팅 */
 
+require('dotenv').config();
 //KEYWORD : JWT, TOKEN, BEARER, AUTHRIZATION
 
 const jwt = require("jsonwebtoken");
 const User = require("../schemas/user");
+
 
 module.exports = async (req, res, next) => {
     const { Authorization } = req.cookies;
@@ -11,13 +13,13 @@ module.exports = async (req, res, next) => {
 
     if (authType !== "Bearer" || !authToken) {
         res.status(400).json({
-            errorMessage: "로그인 후에 이용할 수 있는 기능입니다."
+            errorMessage: "전달된 쿠키에서 오류가 발생하였습니다."
         });
         return;
     };
     //JWT검증
     try {
-        const { userId } = jwt.verify(authToken, "kwon-secret-key")
+        const { userId } = jwt.verify(authToken, process.env.DB_KEY)//환경변수사용
         const user = await User.findOne({userId});
 
         res.locals.user = user //해당하는 user값을 locals.user에 넣는다.
@@ -26,7 +28,7 @@ module.exports = async (req, res, next) => {
         console.error(error);
 
         res.status(400).json({
-            errorMessage: "로그인 후에 이용할 수 있는 기능입니다."
+            errorMessage: "전달된 쿠키에서 오류가 발생하였습니다."
         });
         return;
     };
