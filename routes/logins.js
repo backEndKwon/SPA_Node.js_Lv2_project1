@@ -12,7 +12,7 @@ router.post('/login', async (req, res) => {
     try {
         const { nickname, password } = req.body;
         const user = await Users.findOne({ nickname });
-
+$
         if (!user || user.password !== password) {
             res.status(412).json({
                 errorMessage: "닉네임 또는 패스워드를 확인해주세요"
